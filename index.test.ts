@@ -3,17 +3,26 @@ import test from "node:test";
 import clearScreen from "./index.ts";
 
 type SessionStartHandler = (event: { reason: string }, ctx: any) => Promise<void>;
+type CommandHandler = (args: string, ctx: any) => Promise<void>;
 
-function loadHandler(): SessionStartHandler {
-  let handler: SessionStartHandler | undefined;
+function loadExtension() {
+  let sessionStart: SessionStartHandler | undefined;
+  let command: { description: string; handler: CommandHandler } | undefined;
+
   clearScreen({
     on(event: string, callback: SessionStartHandler) {
       assert.equal(event, "session_start");
-      handler = callback;
+      sessionStart = callback;
+    },
+    registerCommand(name: string, options: { description: string; handler: CommandHandler }) {
+      assert.equal(name, "clear");
+      command = options;
     },
   } as any);
-  assert.ok(handler);
-  return handler;
+
+  assert.ok(sessionStart);
+  assert.ok(command);
+  return { sessionStart, command };
 }
 
 function createContext(mode = "tui") {
@@ -47,10 +56,10 @@ function createContext(mode = "tui") {
 
 for (const reason of ["startup", "new"]) {
   test(`clears and force-redraws for ${reason}`, async () => {
-    const handler = loadHandler();
+    const { sessionStart } = loadExtension();
     const { calls, ctx } = createContext();
 
-    await handler({ reason }, ctx);
+    await sessionStart({ reason }, ctx);
 
     assert.deepEqual(calls, ["clearScreen", "renderNow:true", "done"]);
   });
@@ -58,10 +67,10 @@ for (const reason of ["startup", "new"]) {
 
 for (const reason of ["reload", "resume", "fork"]) {
   test(`does not clear for ${reason}`, async () => {
-    const handler = loadHandler();
+    const { sessionStart } = loadExtension();
     const { calls, ctx } = createContext();
 
-    await handler({ reason }, ctx);
+    await sessionStart({ reason }, ctx);
 
     assert.deepEqual(calls, []);
   });
@@ -69,11 +78,30 @@ for (const reason of ["reload", "resume", "fork"]) {
 
 for (const mode of ["rpc", "json", "print"]) {
   test(`does not clear in ${mode} mode`, async () => {
-    const handler = loadHandler();
+    const { sessionStart } = loadExtension();
     const { calls, ctx } = createContext(mode);
 
-    await handler({ reason: "startup" }, ctx);
+    await sessionStart({ reason: "startup" }, ctx);
 
     assert.deepEqual(calls, []);
   });
 }
+
+test("registers /clear and clears the viewport", async () => {
+  const { command } = loadExtension();
+  const { calls, ctx } = createContext();
+
+  assert.equal(command.description, "Clear the visible terminal viewport");
+  await command.handler("", ctx);
+
+  assert.deepEqual(calls, ["clearScreen", "renderNow:true", "done"]);
+});
+
+test("/clear is a no-op outside TUI mode", async () => {
+  const { command } = loadExtension();
+  const { calls, ctx } = createContext("rpc");
+
+  await command.handler("", ctx);
+
+  assert.deepEqual(calls, []);
+});

@@ -1,20 +1,30 @@
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
 const CLEAR_REASONS = new Set(["startup", "new"]);
 
+async function clearViewport(ctx: ExtensionContext): Promise<void> {
+  if (ctx.mode !== "tui") return;
+
+  await ctx.ui.custom<void>((tui, _theme, _keybindings, done) => {
+    tui.terminal.clearScreen();
+    tui.renderNow(true);
+    done();
+
+    return {
+      render: () => [],
+      invalidate: () => {},
+    };
+  });
+}
+
 export default function clearScreen(pi: ExtensionAPI) {
   pi.on("session_start", async (event, ctx) => {
-    if (!CLEAR_REASONS.has(event.reason) || ctx.mode !== "tui") return;
+    if (!CLEAR_REASONS.has(event.reason)) return;
+    await clearViewport(ctx);
+  });
 
-    await ctx.ui.custom<void>((tui, _theme, _keybindings, done) => {
-      tui.terminal.clearScreen();
-      tui.renderNow(true);
-      done();
-
-      return {
-        render: () => [],
-        invalidate: () => {},
-      };
-    });
+  pi.registerCommand("clear", {
+    description: "Clear the visible terminal viewport",
+    handler: async (_args, ctx) => clearViewport(ctx),
   });
 }

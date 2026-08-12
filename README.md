@@ -3,9 +3,14 @@
 A small [Pi coding agent](https://github.com/earendil-works/pi-mono) extension that clears the visible terminal viewport:
 
 - when Pi launches;
-- after the user starts a session with `/new`.
+- after the user starts a session with `/new`;
+- when the user enters `/clear`.
 
-It does not erase terminal scrollback, and it does not clear on `/reload`, `/resume`, or `/fork`. Non-interactive Pi modes are unaffected.
+It clears only the visible viewport, not terminal scrollback. It does not clear automatically on `/reload`, `/resume`, or `/fork`. Non-interactive Pi modes are unaffected.
+
+## Usage
+
+Enter `/clear` at any time in interactive mode to clear and redraw Pi's visible terminal viewport.
 
 ## Install
 
