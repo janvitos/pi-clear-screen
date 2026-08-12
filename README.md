@@ -45,6 +45,10 @@ npm pack --dry-run
 
 For local development, clone the repository and load `index.ts` with `pi -e`, or symlink the repository into `~/.pi/agent/extensions/`.
 
+## Publishing
+
+Releases are published through npm Trusted Publishing. Bump the version, push a matching tag, and publish a GitHub release; `.github/workflows/publish.yml` tests and publishes the package using GitHub Actions OIDC, without a long-lived npm token.
+
 ## License
 
 MIT
