@@ -1,0 +1,47 @@
+{
+  "name": "@janvitos/pi-clear-screen",
+  "version": "0.1.0",
+  "description": "Clear Pi's terminal viewport on launch and when starting a new session.",
+  "type": "module",
+  "license": "MIT",
+  "author": "janvitos",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janvitos/pi-clear-screen.git"
+  },
+  "homepage": "https://github.com/janvitos/pi-clear-screen#readme",
+  "bugs": {
+    "url": "https://github.com/janvitos/pi-clear-screen/issues"
+  },
+  "keywords": [
+    "pi-package",
+    "pi-coding-agent",
+    "extension",
+    "terminal",
+    "clear-screen"
+  ],
+  "engines": {
+    "node": ">=22.6"
+  },
+  "files": [
+    "index.ts",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --test index.test.ts",
+    "check": "node --experimental-strip-types --check index.ts",
+    "prepublishOnly": "npm test && npm run check"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "extensions": [
+      "./index.ts"
+    ]
+  }
+}
