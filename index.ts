@@ -24,7 +24,9 @@ export default function clearScreen(pi: ExtensionAPI) {
   });
 
   pi.registerCommand("clear", {
-    description: "Clear the visible terminal viewport",
-    handler: async (_args, ctx) => clearViewport(ctx),
+    description: "Start a new session and clear the screen",
+    handler: async (_args, ctx) => {
+      await ctx.newSession();
+    },
   });
 }

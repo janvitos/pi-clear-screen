@@ -42,6 +42,10 @@ function createContext(mode = "tui") {
     calls,
     ctx: {
       mode,
+      async newSession() {
+        calls.push("newSession");
+        return { cancelled: false };
+      },
       ui: {
         async custom(factory: Function) {
           const done = () => calls.push("done");
@@ -87,21 +91,12 @@ for (const mode of ["rpc", "json", "print"]) {
   });
 }
 
-test("registers /clear and clears the viewport", async () => {
+test("registers /clear as a new-session alias", async () => {
   const { command } = loadExtension();
   const { calls, ctx } = createContext();
 
-  assert.equal(command.description, "Clear the visible terminal viewport");
+  assert.equal(command.description, "Start a new session and clear the screen");
   await command.handler("", ctx);
 
-  assert.deepEqual(calls, ["clearScreen", "renderNow:true", "done"]);
-});
-
-test("/clear is a no-op outside TUI mode", async () => {
-  const { command } = loadExtension();
-  const { calls, ctx } = createContext("rpc");
-
-  await command.handler("", ctx);
-
-  assert.deepEqual(calls, []);
+  assert.deepEqual(calls, ["newSession"]);
 });
