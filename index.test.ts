@@ -3,26 +3,18 @@ import test from "node:test";
 import clearScreen from "./index.ts";
 
 type SessionStartHandler = (event: { reason: string }, ctx: any) => Promise<void>;
-type CommandHandler = (args: string, ctx: any) => Promise<void>;
-
 function loadExtension() {
   let sessionStart: SessionStartHandler | undefined;
-  let command: { description: string; handler: CommandHandler } | undefined;
 
   clearScreen({
     on(event: string, callback: SessionStartHandler) {
       assert.equal(event, "session_start");
       sessionStart = callback;
     },
-    registerCommand(name: string, options: { description: string; handler: CommandHandler }) {
-      assert.equal(name, "clear");
-      command = options;
-    },
   } as any);
 
   assert.ok(sessionStart);
-  assert.ok(command);
-  return { sessionStart, command };
+  return { sessionStart };
 }
 
 function createContext(mode = "tui") {
@@ -90,13 +82,3 @@ for (const mode of ["rpc", "json", "print"]) {
     assert.deepEqual(calls, []);
   });
 }
-
-test("registers /clear as a new-session alias", async () => {
-  const { command } = loadExtension();
-  const { calls, ctx } = createContext();
-
-  assert.equal(command.description, "Start a new session and clear the screen");
-  await command.handler("", ctx);
-
-  assert.deepEqual(calls, ["newSession"]);
-});

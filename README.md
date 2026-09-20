@@ -5,13 +5,7 @@ A small [Pi coding agent](https://github.com/earendil-works/pi-mono) extension t
 - when Pi launches;
 - after the user starts a session with `/new`.
 
-It also adds `/clear` as an alias for `/new`. The command starts a fresh session, clears the conversation context, and triggers the same reliable screen clear as `/new`.
-
 The extension clears only the visible viewport, not terminal scrollback. It does not clear automatically on `/reload`, `/resume`, or `/fork`. Non-interactive Pi modes are unaffected.
-
-## Usage
-
-Enter `/clear` in interactive mode to start a fresh session and clear the screen.
 
 ## Install
 
